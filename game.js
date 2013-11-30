@@ -287,4 +287,8 @@ var gameLoop = function(){
 }
 window.addEventListener('load', gameLoop, false);
 window.addEventListener('mousemove', gameMove, false);
+window.addEventListener('touchstart', function(e){
+  e.preventDefault();
+  gameMove(e.touches[0]);
+}, false);
 
