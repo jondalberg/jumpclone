@@ -3,6 +3,8 @@ var width = 320,
     c = document.getElementById('c'),
     ctx = c.getContext('2d'),
     gLoop,
+    points = 0,
+    state = true,
     howManyCircles = 10,
     circles = [];
 
@@ -96,7 +98,25 @@ var player = new(function(){
   };
 
   self.checkJump = function(){
-    self.setPosition(self.X, self.Y - self.jumpSpeed);
+    if(self.Y > height * 0.4) {
+      self.setPosition(self.X, self.Y - self.jumpSpeed);
+    } else {
+      if(self.jumpSpeed > 10) points++;
+      moveCircles(self.jumpSpeed * 0.5);
+      platforms.forEach(function(platform, ind) {
+        platform.y += self.jumpSpeed;
+        if(platform.y > height) {
+          var type = ~~(Math.random() * 5);
+          if(type === 0) {
+            type = 1;
+          } else {
+            type = 0;
+          }
+          platforms[ind] = new Platform(Math.random() * (width - platformWidth), platform.y - height, type);
+        }
+      });
+    }
+
     self.jumpSpeed--;
     if(self.jumpSpeed == 0) {
       self.isJumping = false;
@@ -110,7 +130,11 @@ var player = new(function(){
       self.setPosition(self.X, self.Y + self.fallSpeed);
       self.fallSpeed++;
     } else {
-      self.fallStop();
+      if(points === 0) {
+        self.fallStop();
+      } else {
+        gameOver();
+      }
     }
   };
 
@@ -145,6 +169,7 @@ var Platform = function(x,y,type) {
     self.firstColor = '#aadd00';
     self.secondColor = '#698b22';
     self.onCollide = function() {
+      player.fallStop();
       player.jumpSpeed = 50;
     };
   }
@@ -152,6 +177,9 @@ var Platform = function(x,y,type) {
   self.x = ~~x;
   self.y = y;
   self.type = type;
+  
+  self.isMoving = ~~(Math.random() *2);
+  self.direction = ~~(Math.random() *2) ? -1 : 1;
 
   self.draw = function() {
     ctx.fillStyle = 'rgba(255,255,255,1)';
@@ -210,24 +238,52 @@ var gameMove = function(e) {
   }
 };
 
+var drawScore = function(){
+  ctx.fillStyle = 'black';
+  ctx.fillText("POINTS: " + points, 10, height - 10);
+};
+
+var gameOver = function(){
+  state = false;
+  clearTimeout(gLoop);
+  setTimeout(function(){
+    clear();
+    ctx.fillStyle = "black";
+    ctx.font = "1opt Arial";
+    ctx.fillText("GAME OVER", width/2 - 60, height/2 - 50);
+    ctx.fillText("YOUR SCORE: " + points, width/2 - 60, height/2 - 30);
+  }, 100);
+};
+
 var gameLoop = function(){
   clear();
   
-  //moveCircles(5);
   drawCircles();
-  
-  platforms.forEach(function(platform){
-    platform.draw();
-  });
 
   if(player.isJumping) player.checkJump();
   if(player.isFalling) player.checkFall();
 
-  checkCollision();
-
   player.draw();
   
-  gLoop = setTimeout(gameLoop, 1000/50); //FPS around 50
+  platforms.forEach(function(platform, index){
+    if(platform.isMoving) {
+      if(platform.x < 0) {
+        platform.direction = 1;
+      } else if (platform.x > width - platformWidth) {
+        platform.direction = -1;
+      }
+      platform.x += platform.direction * (index/2) * ~~(points/100);
+    }
+    platform.draw();
+  });
+
+  checkCollision();
+
+  drawScore();
+
+  if(state) {
+    gLoop = setTimeout(gameLoop, 1000/50); //FPS around 50
+  }
 }
 window.addEventListener('load', gameLoop, false);
 window.addEventListener('mousemove', gameMove, false);
