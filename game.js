@@ -56,6 +56,9 @@ var player = new(function(){
   self.height = 95;
   self.X = 0;
   self.Y = 0;
+  self.frames = 1; // # of frames
+  self.actualFrame = 0; // start frame at 0
+  self.interval = 0; // # draw every 4th interval
 
   self.setPosition = function(x,y) {
     self.X = x;
@@ -64,10 +67,20 @@ var player = new(function(){
 
   self.draw = function(){
     try {
-      ctx.drawImage(self.image, 0, 0, self.width, self.height, self.X, self.Y, self.width, self.height);
+      ctx.drawImage(self.image, 0, self.height * self.actualFrame, self.width, self.height, self.X, self.Y, self.width, self.height);
     } catch(e) {
       // we get here sometimes...
     }
+
+    if(self.interval === 4) {
+      if(self.actualFrame === self.frames) {
+        self.actualFrame = 0;
+      } else {
+        self.actualFrame++;
+      }
+      self.interval = 0;
+    }
+    self.interval++;
   };
 })();
 
