@@ -133,6 +133,72 @@ var player = new(function(){
   };
 })();
 
+var Platform = function(x,y,type) {
+  var self = this;
+  self.firstColor = '#ff8c00';
+  self.secondColor = '#eeee00';
+  self.onCollide = function(){
+    player.fallStop();
+  };
+
+  if(type === 1) {
+    self.firstColor = '#aadd00';
+    self.secondColor = '#698b22';
+    self.onCollide = function() {
+      player.jumpSpeed = 50;
+    };
+  }
+
+  self.x = ~~x;
+  self.y = y;
+  self.type = type;
+
+  self.draw = function() {
+    ctx.fillStyle = 'rgba(255,255,255,1)';
+    var gradient = ctx.createRadialGradient(self.x + (platformWidth/2), self.y + (platformHeight/2), 5, self.x + (platformWidth/2), self.y + (platformHeight/2), 45);
+    gradient.addColorStop(0, self.firstColor);
+    gradient.addColorStop(1, self.secondColor);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(self.x, self.y, platformWidth, platformHeight);
+  };
+
+  return self;
+};
+
+var platforms = [];
+var nrOfPlatforms = 7,
+    platformWidth = 70,
+    platformHeight = 20;      
+
+var generatePlatforms = function() {
+  var position = 0,
+      type;
+
+  for(var i=0; i<nrOfPlatforms; i++){
+    type = ~~(Math.random() * 5);
+    if(type === 0) {
+      type = 1;
+    } else {
+      type = 0;
+    }
+    platforms[i] = new Platform(Math.random() * (width - platformWidth), position, type);
+    if(position < height - platformHeight) {
+      position += ~~(height / nrOfPlatforms);
+    }
+  }
+}();
+
+var checkCollision = function(){
+  platforms.forEach(function(e, ind) {
+    if(player.isFalling && (player.X < e.x + platformWidth) &&
+      (player.X + player.width > e.x) &&
+      (player.Y + player.height > e.y) &&
+      (player.Y + player.height < e.y + platformHeight)) {
+      e.onCollide();
+    }
+  });
+};
+
 player.setPosition(~~((width - player.width)/2), ~~((height - player.height)/2));
 player.jump();
 
@@ -146,11 +212,21 @@ var gameMove = function(e) {
 
 var gameLoop = function(){
   clear();
-  moveCircles(5);
+  
+  //moveCircles(5);
   drawCircles();
+  
+  platforms.forEach(function(platform){
+    platform.draw();
+  });
+
   if(player.isJumping) player.checkJump();
   if(player.isFalling) player.checkFall();
+
+  checkCollision();
+
   player.draw();
+  
   gLoop = setTimeout(gameLoop, 1000/50); //FPS around 50
 }
 window.addEventListener('load', gameLoop, false);
