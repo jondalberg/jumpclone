@@ -59,7 +59,11 @@ var player = new(function(){
   self.frames = 1; // # of frames
   self.actualFrame = 0; // start frame at 0
   self.interval = 0; // # draw every 4th interval
-
+  self.isJumping = false;
+  self.isFalling = false;
+  self.jumpSpeed = 0;
+  self.fallSpeed = 0;
+  
   self.setPosition = function(x,y) {
     self.X = x;
     self.Y = y;
@@ -82,15 +86,73 @@ var player = new(function(){
     }
     self.interval++;
   };
+  
+  self.jump = function(){
+    if(!self.isJumping && !self.isFalling) {
+      self.fallSpeed = 0;
+      self.isJumping = true;
+      self.jumpSpeed = 17;
+    }
+  };
+
+  self.checkJump = function(){
+    self.setPosition(self.X, self.Y - self.jumpSpeed);
+    self.jumpSpeed--;
+    if(self.jumpSpeed == 0) {
+      self.isJumping = false;
+      self.isFalling = true;
+      self.fallSpeed = 1;
+    }
+  };
+
+  self.checkFall = function(){
+    if(self.Y < height - self.height) {
+      self.setPosition(self.X, self.Y + self.fallSpeed);
+      self.fallSpeed++;
+    } else {
+      self.fallStop();
+    }
+  };
+
+  self.fallStop = function() {
+    self.isFalling = false;
+    self.fallSpeed = 0;
+    self.jump();
+  };
+
+  self.moveLeft = function(){
+    if(self.X > 0) {
+      self.setPosition(self.X - 5, self.Y);
+    }
+  };
+
+  self.moveRight = function(){
+    if(self.X + self.width < width) {
+      self.setPosition(self.X + 5, self.Y);
+    }
+  };
 })();
 
 player.setPosition(~~((width - player.width)/2), ~~((height - player.height)/2));
+player.jump();
+
+var gameMove = function(e) {
+  if(player.X + c.offsetLeft > e.pageX) {
+    player.moveLeft();
+  } else if(player.X + c.offsetLeft < e.pageX) {
+    player.moveRight();
+  }
+};
 
 var gameLoop = function(){
   clear();
   moveCircles(5);
   drawCircles();
+  if(player.isJumping) player.checkJump();
+  if(player.isFalling) player.checkFall();
   player.draw();
   gLoop = setTimeout(gameLoop, 1000/50); //FPS around 50
 }
 window.addEventListener('load', gameLoop, false);
+window.addEventListener('mousemove', gameMove, false);
+
