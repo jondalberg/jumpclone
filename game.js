@@ -291,4 +291,12 @@ window.addEventListener('touchstart', function(e){
   e.preventDefault();
   gameMove(e.touches[0]);
 }, false);
+window.addEventListener('touchmove', function(e){
+  e.preventDefault();
+  gameMove(e.touches[0]);
+}, false);
+window.addEventListener('touchend', function(e){
+  e.preventDefault();
+  gameMove(e.touches[0]);
+}, false);
 
