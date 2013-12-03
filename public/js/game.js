@@ -163,6 +163,7 @@ var Platform = function(x,y,type) {
   self.secondColor = '#eeee00';
   self.onCollide = function(){
     player.fallStop();
+    bounce_sounds.get();
   };
 
   if(type === 1) {
@@ -171,6 +172,7 @@ var Platform = function(x,y,type) {
     self.onCollide = function() {
       player.fallStop();
       player.jumpSpeed = 50;
+      big_bounce_sounds.get();
     };
   }
 
@@ -285,6 +287,36 @@ var gameLoop = function(){
     gLoop = setTimeout(gameLoop, 1000/50); //FPS around 50
   }
 }
+
+function SoundPool(maxSize) {
+  var size = maxSize;
+  var pool = [];
+  this.pool = pool;
+  var currSound = 0;
+
+  this.init = function(object) {
+    for(var i=0; i<size; i++) {
+      bounce = new Audio("sounds/" + object + ".mp3");
+      bounce.volume = 0.12;
+      bounce.load();
+      pool[i] = bounce;
+    }
+};
+
+  this.get = function() {
+    if(pool[currSound].currentTime === 0 || pool[currSound].ended) {
+      pool[currSound].play();
+    }
+    currSound = (currSound + 1) % size;
+  };
+}
+
+var bounce_sounds = new SoundPool(10);
+bounce_sounds.init('bounce');
+var big_bounce_sounds = new SoundPool(5);
+big_bounce_sounds.init('big_bounce');
+
+
 window.addEventListener('load', gameLoop, false);
 window.addEventListener('mousemove', gameMove, false);
 window.addEventListener('touchstart', function(e){
