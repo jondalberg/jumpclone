@@ -314,9 +314,9 @@ function SoundPool(maxSize) {
   };
 }
 
-var bounce_sounds = new SoundPool(10);
+var bounce_sounds = new SoundPool(1);
 //bounce_sounds.init('bounce');
-var big_bounce_sounds = new SoundPool(5);
+var big_bounce_sounds = new SoundPool(1);
 //big_bounce_sounds.init('big_bounce');
 
 var sounds_loaded = false;
