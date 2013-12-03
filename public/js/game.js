@@ -307,9 +307,9 @@ function SoundPool(maxSize) {
     if(!pool[currSound]){
       return;
     }
-    if(pool[currSound].currentTime === 0 || pool[currSound].ended) {
+    //if(pool[currSound].currentTime === 0 || pool[currSound].ended) {
       pool[currSound].play();
-    }
+    //}
     currSound = (currSound + 1) % size;
   };
 }
@@ -323,7 +323,7 @@ var sounds_loaded = false;
 var loadSounds = function() {
   if(!sounds_loaded) {
     bounce_sounds.init('bounce');
-    big_bound_sounds.init('big_bounce');
+    big_bounce_sounds.init('big_bounce');
     sounds_loaded = true;
   }
 };
@@ -343,4 +343,7 @@ window.addEventListener('touchend', function(e){
   e.preventDefault();
   gameMove(e.touches[0]);
 }, false);
-
+window.addEventListener('click', function(e) {
+  e.preventDefault();
+  loadSounds();
+}, false);
