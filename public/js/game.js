@@ -301,7 +301,7 @@ function SoundPool(maxSize) {
       bounce.load();
       pool[i] = bounce;
     }
-};
+  };
 
   this.get = function() {
     if(!pool[currSound]){
@@ -332,6 +332,7 @@ window.addEventListener('load', gameLoop, false);
 window.addEventListener('mousemove', gameMove, false);
 window.addEventListener('touchstart', function(e){
   e.preventDefault();
+  loadSounds();
   gameMove(e.touches[0]);
 }, false);
 window.addEventListener('touchmove', function(e){
