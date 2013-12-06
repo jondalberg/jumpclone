@@ -144,15 +144,17 @@ var player = new(function(){
     self.jump();
   };
 
-  self.moveLeft = function(){
+  self.moveLeft = function(dist){
+    var dist = dist || 5;
     if(self.X > 0) {
-      self.setPosition(self.X - 5, self.Y);
+      self.setPosition(self.X - dist, self.Y);
     }
   };
 
-  self.moveRight = function(){
+  self.moveRight = function(dist){
+    var dist = dist || 5;
     if(self.X + self.width < width) {
-      self.setPosition(self.X + 5, self.Y);
+      self.setPosition(self.X + dist, self.Y);
     }
   };
 })();
@@ -216,7 +218,8 @@ var generatePlatforms = function() {
       position += ~~(height / nrOfPlatforms);
     }
   }
-}();
+};
+generatePlatforms();
 
 var checkCollision = function(){
   platforms.forEach(function(e, ind) {
@@ -255,6 +258,14 @@ var gameOver = function(){
     ctx.fillText("GAME OVER", width/2 - 60, height/2 - 50);
     ctx.fillText("YOUR SCORE: " + points, width/2 - 60, height/2 - 30);
   }, 100);
+  setTimeout(function(){
+    points = 0;
+    generatePlatforms();
+    state = true;
+    player.setPosition(~~((width - player.width)/2), ~~((height - player.height)/2));
+    player.jump();
+    gameLoop();
+  }, 2000);
 };
 
 var gameLoop = function(){
@@ -286,7 +297,15 @@ var gameLoop = function(){
   if(state) {
     gLoop = setTimeout(gameLoop, 1000/50); //FPS around 50
   }
-}
+};
+
+var demo = function(){
+  if(Math.random() > 0.5) {
+    player.moveLeft(20);
+  } else {
+    player.moveRight(20);
+  }
+};
 
 function SoundPool(maxSize) {
   var size = maxSize;
@@ -307,17 +326,15 @@ function SoundPool(maxSize) {
     if(!pool[currSound]){
       return;
     }
-    //if(pool[currSound].currentTime === 0 || pool[currSound].ended) {
+    if(pool[currSound].currentTime === 0 || pool[currSound].ended) {
       pool[currSound].play();
-    //}
+    }
     currSound = (currSound + 1) % size;
   };
 }
 
 var bounce_sounds = new SoundPool(5);
-//bounce_sounds.init('bounce');
 var big_bounce_sounds = new SoundPool(5);
-//big_bounce_sounds.init('big_bounce');
 
 var sounds_loaded = false;
 var loadSounds = function() {
@@ -328,22 +345,28 @@ var loadSounds = function() {
   }
 };
 
-window.addEventListener('load', gameLoop, false);
-window.addEventListener('mousemove', gameMove, false);
-window.addEventListener('touchstart', function(e){
+var init = function() {
+  gameLoop();
+  setInterval(demo, 1000);
+};
+
+window.addEventListener('load', init, false);
+c.addEventListener('mousemove', gameMove, false);
+c.addEventListener('touchstart', function(e){
   e.preventDefault();
   loadSounds();
   gameMove(e.touches[0]);
 }, false);
-window.addEventListener('touchmove', function(e){
+c.addEventListener('touchmove', function(e){
   e.preventDefault();
   gameMove(e.touches[0]);
 }, false);
-window.addEventListener('touchend', function(e){
+c.addEventListener('touchend', function(e){
   e.preventDefault();
   gameMove(e.touches[0]);
 }, false);
-window.addEventListener('click', function(e) {
+c.addEventListener('click', function(e) {
   e.preventDefault();
   loadSounds();
 }, false);
+
